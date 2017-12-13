@@ -15,10 +15,12 @@ class Memory {
         0.ub
     }
 
+    val digitsStart = 0x0
+
     var I = 0.us
     var delayTimerRegister = 0.ub
     var soundTimerRegister = 0.ub
-    var PC = 0.us
+    var PC = 0x200.us
     var SP = 0.ub
     val stack = Array(16) {
         0.us
@@ -38,9 +40,14 @@ class Memory {
     }
 
     fun pop(): Ushort {
-        val value = stack[SP.toInt()]
         SP--
-        return value
+        return stack[SP.toInt()]
+    }
+
+    fun fillRam(rom: ByteArray) {
+        for(i in 0 until rom.size) {
+            ram[i+0x200] = rom[i].ub
+        }
     }
 
 }
