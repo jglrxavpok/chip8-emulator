@@ -22,7 +22,7 @@ class Display(val memory: Memory) {
         val address = memory.I.toInt()
         for(yline in 0 until n) {
             var data = memory.ram[address+yline].toInt()
-            for(xline in 0..7) {
+            for(xline in 0 until 8) {
                 val pixel = (data and 0x80)
                 if(pixel != 0) {
                     val posx = (x+xline) % 64
@@ -31,7 +31,8 @@ class Display(val memory: Memory) {
                     if(screen[index] == WHITE) {
                         memory.registers[0xF] = 1.ub // set collision flag
                     }
-                    screen[index] = screen[index] xor 1
+                    screen[index] = /*screen[index] xor */1
+                } else {
                 }
                 data = data shl 1
             }
@@ -154,16 +155,16 @@ class Display(val memory: Memory) {
         glEnable(GL_TEXTURE_2D)
         glBegin(GL_QUADS)
         glBindTexture(GL_TEXTURE_2D, texID)
-        glTexCoord2f(0f, 0f)
+        glTexCoord2f(0f, 1f)
         glVertex2f(-1f, -1f)
 
-        glTexCoord2f(1f, 0f)
+        glTexCoord2f(1f, 1f)
         glVertex2f(1f, -1f)
 
-        glTexCoord2f(1f, 1f)
+        glTexCoord2f(1f, 0f)
         glVertex2f(1f, 1f)
 
-        glTexCoord2f(0f, 1f)
+        glTexCoord2f(0f, 0f)
         glVertex2f(-1f, 1f)
 
         glBindTexture(GL_TEXTURE_2D, 0)
@@ -175,7 +176,7 @@ class Display(val memory: Memory) {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.malloc(64*32*3)
             for (pixel in screen) {
-                val color = (pixel * 0xFF).toByte()
+                val color = (pixel * 0xF0).toByte()
                 buffer.put(color)
                 buffer.put(color)
                 buffer.put(color)

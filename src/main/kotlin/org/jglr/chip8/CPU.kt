@@ -20,12 +20,12 @@ class CPU(val memory: Memory, val display: Display, val input: Input) {
             in 0x2000..0x2FFF -> call(instruction and 0xFFF)
             in 0x3000..0x3FFF -> se(highInstruction and 0xF, lowInstruction)
             in 0x4000..0x4FFF -> sne(highInstruction and 0xF, lowInstruction)
-            in 0x5000..0x5FFF -> seRegisters(highInstruction and 0xF, (lowInstruction shr 1) and 0xF)
+            in 0x5000..0x5FFF -> seRegisters(highInstruction and 0xF, (lowInstruction shr 4) and 0xF)
             in 0x6000..0x6FFF -> ld(highInstruction and 0xF, lowInstruction)
-            in 0x6000..0x6FFF -> add(highInstruction and 0xF, lowInstruction)
+            in 0x7000..0x7FFF -> add(highInstruction and 0xF, lowInstruction)
             in 0x8000..0x8FFF -> {
                 val register1 = highInstruction and 0xF
-                val register2 = (lowInstruction shr 1) and 0xF
+                val register2 = (lowInstruction shr 4) and 0b00001111
                 when(lowInstruction.toInt() and 0xF) {
                     0 -> ld(register1, memory.registers[register2])
                     1 -> or(register1, register2)
@@ -38,11 +38,11 @@ class CPU(val memory: Memory, val display: Display, val input: Input) {
                     0xE -> shl(register1)
                 }
             }
-            in 0x9000..0x9FFF -> sne(highInstruction and 0xF, memory.registers[(lowInstruction shr 1) and 0xF])
+            in 0x9000..0x9FFF -> sne(highInstruction and 0xF, memory.registers[(lowInstruction shr 4) and 0xF])
             in 0xA000..0xAFFF -> ldi(instruction and 0xFFF)
             in 0xB000..0xBFFF -> jp((instruction and 0xFFF) + memory.registers[0].toInt())
             in 0xC000..0xCFFF -> rnd(highInstruction and 0xF, lowInstruction)
-            in 0xD000..0xDFFF -> drw(highInstruction and 0xF, (lowInstruction shr 1) and 0xF, lowInstruction and 0xF)
+            in 0xD000..0xDFFF -> drw(highInstruction and 0xF, (lowInstruction shr 4) and 0xF, lowInstruction and 0xF)
             in 0xE000..0xEFFF -> {
                 val x = highInstruction and 0xF
                 when(lowInstruction.toInt() and 0xFF) {
@@ -124,8 +124,8 @@ class CPU(val memory: Memory, val display: Display, val input: Input) {
     fun subn(x: Ubyte, y: Ubyte) {
         val vx = memory.registers[x]
         val vy = memory.registers[y]
-        memory.registers[0xF] = (if(vx.toInt() < vy.toInt()) 1 else 0).ub // not borrow
-        memory.registers[x] -= vy
+        memory.registers[0xF] = (if(vx.toInt() <= vy.toInt()) 1 else 0).ub // not borrow
+        memory.registers[x] = vy-vx
     }
 
     fun shr(x: Ubyte) {
@@ -137,7 +137,7 @@ class CPU(val memory: Memory, val display: Display, val input: Input) {
     fun sub(x: Ubyte, y: Ubyte) {
         val vx = memory.registers[x]
         val vy = memory.registers[y]
-        memory.registers[0xF] = (if(vx.toInt() > vy.toInt()) 1 else 0).ub // not borrow
+        memory.registers[0xF] = (if(vx.toInt() >= vy.toInt()) 1 else 0).ub // not borrow
         memory.registers[x] -= vy
     }
 
@@ -191,7 +191,7 @@ class CPU(val memory: Memory, val display: Display, val input: Input) {
     }
 
     fun call(address: Ushort){
-        memory.push(memory.PC +2)
+        memory.push(memory.PC)
         memory.PC = address
     }
 

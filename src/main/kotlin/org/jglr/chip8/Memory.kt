@@ -50,4 +50,12 @@ class Memory {
         }
     }
 
+    fun dumpRegisters() {
+        println("=== START REGISTERS ===")
+        for(i in 0..15) {
+            println("V${Integer.toHexString(i)} = 0x${Integer.toHexString(registers[i].toInt())}")
+        }
+        println("=== END REGISTERS ===")
+    }
+
 }

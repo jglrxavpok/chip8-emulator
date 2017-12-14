@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
     glfwSwapInterval(1) // enables V-Sync
 
 
-    val rom = CPU::class.java.getResourceAsStream("/SCTEST.chip8").buffered().use { it.readBytes() }
+    val rom = CPU::class.java.getResourceAsStream("/Chip8 Picture.ch8").buffered().use { it.readBytes() }
     val memory = Memory()
     memory.fillRam(rom)
     val input = Input()
@@ -44,7 +44,7 @@ fun main(args: Array<String>) {
     display.init()
     while(!glfwWindowShouldClose(windowHandle)) {
         glfwPollEvents()
-        repeat(10000) { // 1000*60 instructions per second approx.
+        repeat(1000) { // 10*60 instructions per second approx.
             cpu.executeNextInstruction()
         }
 
